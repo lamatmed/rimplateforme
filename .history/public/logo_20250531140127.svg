@@ -1,0 +1,11 @@
+<svg width="200" height="60" viewBox="0 0 200 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="200" height="60" fill="#0F172A"/>
+  <text x="20" y="38" font-family="Arial, sans-serif" font-size="24" fill="#38BDF8" font-weight="bold">
+    Rim
+  </text>
+  <text x="80" y="38" font-family="Arial, sans-serif" font-size="24" fill="#FACC15" font-weight="bold">
+    Plateforme
+  </text>
+  <circle cx="10" cy="10" r="5" fill="#38BDF8"/>
+  <circle cx="190" cy="10" r="5" fill="#FACC15"/>
+</svg>

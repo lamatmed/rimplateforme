@@ -1,20 +1,6 @@
 @import "tailwindcss";
 
-@layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-  }
-
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-  }
-}
-
-body {
-  @apply bg-white dark:bg-gray-900 text-gray-900 dark:text-white transition-colors duration-200;
-}
+:
 
 @layer utilities {
   .animation-delay-2000 {
@@ -49,21 +35,22 @@ html {
   scroll-behavior: smooth;
 }
 
-/* Simple scrollbar */
+/* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 10px;
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-gray-100 dark:bg-gray-800;
+  background: #f1f1f1;
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-gray-300 dark:bg-gray-600 rounded-full;
+  background: #888;
+  border-radius: 5px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-gray-400 dark:bg-gray-500;
+  background: #555;
 }
 
 /* Dark mode scrollbar */
@@ -80,5 +67,3 @@ html {
     background: #444;
   }
 }
-
-

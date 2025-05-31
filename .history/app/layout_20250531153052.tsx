@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils"; // ou "../lib/utils" selon ton chemin
 import "./globals.css";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
-
+import { ThemeProvider } from "next-themes";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,7 +34,7 @@ export default function RootLayout({
         geistMono.variable,
         "antialiased min-h-screen flex flex-col"
       )}>
-      
+       
           <div className="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-white transition-colors duration-200">
             {/* Background Effects */}
             <div className="fixed inset-0 overflow-hidden pointer-events-none">
@@ -58,7 +58,7 @@ export default function RootLayout({
               <Footer />
             </div>
           </div>
-      
+        </ThemeProvider>
       </body>
     </html>
   );

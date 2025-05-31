@@ -1,0 +1,34 @@
+import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
+import { cn } from "@/lib/utils"; // ou "../lib/utils" selon ton chemin
+import "./globals.css";
+
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+export const metadata: Metadata = {
+  title: "Rim Plateforme",
+  description: "La bonne route vers web developpement",
+  icons: { icon: "/logo.svg" },
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="en">
+      <body className={cn(geistSans.variable, geistMono.variable, "antialiased")}>
+        {children}
+      </body>
+    </html>
+  );
+}

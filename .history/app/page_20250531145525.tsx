@@ -143,7 +143,6 @@ const features = [
       </svg>
     ),
   },
-  
   {
     title: "Solutions Cloud",
     description: "Déploiement et gestion de vos applications dans le cloud pour une scalabilité optimale.",
