@@ -188,9 +188,9 @@ export async function getUsers() {
       throw new Error('Non authentifié')
     }
 
-    const decoded = verify(token, process.env.JWT_SECRET || 'your-secret-key') as { userId: string }
+    const decoded = verify(token, process.env.JWT_SECRET || '') as { id: string }
     const user = await prisma.user.findUnique({
-      where: { id: decoded.userId },
+      where: { id: decoded.id },
       select: { role: true }
     })
 
@@ -222,15 +222,15 @@ export async function getUsers() {
 
 export async function toggleUserBlock(userId: string, isBlocked: boolean) {
   try {
-    const token = (await cookies()).get('token')?.value
+    const token = cookies().get('token')?.value
 
     if (!token) {
       throw new Error('Non authentifié')
     }
 
-    const decoded = verify(token, process.env.JWT_SECRET || 'your-secret-key') as { userId: string }
+    const decoded = verify(token, process.env.JWT_SECRET || '') as { id: string }
     const admin = await prisma.user.findUnique({
-      where: { id: decoded.userId },
+      where: { id: decoded.id },
       select: { role: true }
     })
 

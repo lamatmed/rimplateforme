@@ -6,11 +6,24 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { Role } from '@prisma/client'
+import { getUsers, toggleUserBlock } from '@/lib/actions'
+
+interface User {
+  id: string
+  name: string
+  email: string
+  role: Role
+  photo: string | null
+  isBlocked: boolean
+  createdAt: string
+}
 
 export default function DashboardPage() {
   const router = useRouter()
   const [user, setUser] = useState<any>(null)
+  const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
+  const [usersLoading, setUsersLoading] = useState(false)
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -22,6 +35,11 @@ export default function DashboardPage() {
         }
         const data = await response.json()
         setUser(data)
+        
+        // Si l'utilisateur est admin, charger la liste des utilisateurs
+        if (data.role === Role.ADMIN) {
+          fetchUsers()
+        }
       } catch (error) {
         console.error('Error fetching user:', error)
         router.push('/?message=Une erreur est survenue, veuillez vous reconnecter')
@@ -30,8 +48,31 @@ export default function DashboardPage() {
       }
     }
 
+    const fetchUsers = async () => {
+      setUsersLoading(true)
+      try {
+        const { users } = await getUsers()
+        setUsers(users)
+      } catch (error) {
+        console.error('Error fetching users:', error)
+      } finally {
+        setUsersLoading(false)
+      }
+    }
+
     fetchUser()
   }, [router])
+
+  const handleToggleBlock = async (userId: string, currentStatus: boolean) => {
+    try {
+      const { user: updatedUser } = await toggleUserBlock(userId, !currentStatus)
+      setUsers(users.map(u => 
+        u.id === userId ? { ...u, isBlocked: !currentStatus } : u
+      ))
+    } catch (error) {
+      console.error('Error updating user:', error)
+    }
+  }
 
   const getRoleLabel = (role: Role) => {
     switch (role) {
@@ -98,29 +139,130 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
           <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
             <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-              Activités récentes
+              Total Utilisateurs
             </h3>
             <p className="text-3xl font-bold text-indigo-600 dark:text-indigo-400">
-              12
+              {users.length}
             </p>
           </div>
           <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
             <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-              Messages non lus
+              Utilisateurs Bloqués
             </h3>
             <p className="text-3xl font-bold text-indigo-600 dark:text-indigo-400">
-              3
+              {users.filter(u => u.isBlocked).length}
             </p>
           </div>
           <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
             <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-              Tâches en cours
+              Administrateurs
             </h3>
             <p className="text-3xl font-bold text-indigo-600 dark:text-indigo-400">
-              5
+              {users.filter(u => u.role === Role.ADMIN).length}
             </p>
           </div>
         </div>
+
+        {/* Liste des utilisateurs (Admin uniquement) */}
+        {user?.role === Role.ADMIN && (
+          <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 mb-6">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+              Gestion des Utilisateurs
+            </h2>
+            {usersLoading ? (
+              <div className="animate-pulse space-y-4">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="h-16 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                ))}
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                  <thead className="bg-gray-50 dark:bg-gray-700">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        Utilisateur
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        Email
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        Rôle
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        Statut
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                    {users.map((user) => (
+                      <tr key={user.id}>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            {user.photo ? (
+                              <Image
+                                src={user.photo}
+                                alt={user.name}
+                                width={32}
+                                height={32}
+                                className="rounded-full"
+                              />
+                            ) : (
+                              <div className="h-8 w-8 rounded-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center">
+                                <span className="text-sm font-medium text-indigo-600 dark:text-indigo-300">
+                                  {user.name.charAt(0)}
+                                </span>
+                              </div>
+                            )}
+                            <div className="ml-4">
+                              <div className="text-sm font-medium text-gray-900 dark:text-white">
+                                {user.name}
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-500 dark:text-gray-400">
+                            {user.email}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200">
+                            {getRoleLabel(user.role)}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                            user.isBlocked
+                              ? 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200'
+                              : 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200'
+                          }`}>
+                            {user.isBlocked ? 'Bloqué' : 'Actif'}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          <button
+                            onClick={() => handleToggleBlock(user.id, user.isBlocked)}
+                            className={`${
+                              user.isBlocked
+                                ? 'text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300'
+                                : 'text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300'
+                            }`}
+                          >
+                            {user.isBlocked ? 'Débloquer' : 'Bloquer'}
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Contenu principal */}
         <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
@@ -132,61 +274,12 @@ export default function DashboardPage() {
               Bienvenue sur votre tableau de bord. Ici, vous pouvez gérer vos activités,
               consulter vos messages et suivre vos tâches en cours.
             </p>
-            <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                Prochaines étapes
-              </h3>
-              <ul className="space-y-2">
-                <li className="flex items-center text-gray-600 dark:text-gray-300">
-                  <svg
-                    className="h-5 w-5 text-indigo-500 mr-2"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                  Compléter votre profil
-                </li>
-                <li className="flex items-center text-gray-600 dark:text-gray-300">
-                  <svg
-                    className="h-5 w-5 text-indigo-500 mr-2"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                  Explorer les services disponibles
-                </li>
-                <li className="flex items-center text-gray-600 dark:text-gray-300">
-                  <svg
-                    className="h-5 w-5 text-indigo-500 mr-2"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                  Configurer vos préférences
-                </li>
-              </ul>
-            </div>
+            {user?.role === Role.ADMIN && (
+              <p className="text-gray-600 dark:text-gray-300">
+                En tant qu'administrateur, vous avez accès à la gestion complète des utilisateurs.
+                Vous pouvez voir le nombre total d'utilisateurs, les bloquer ou les débloquer selon vos besoins.
+              </p>
+            )}
           </div>
         </div>
       </div>
