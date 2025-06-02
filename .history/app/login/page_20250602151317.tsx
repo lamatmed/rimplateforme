@@ -63,7 +63,7 @@ export default function LoginPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={mounted ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6 }}
-          className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 sm:p-10 backdrop-blur-sm bg-opacity-90"
+          className="bg-white dark:w rounded-2xl shadow-xl p-8 sm:p-10 backdrop-blur-sm bg-opacity-90"
         >
           <div className="flex justify-center mb-8">
             <motion.div
