@@ -307,7 +307,3 @@ export default function DashboardPage() {
     </div>
   )
 }
-
-function fetchUser() {
-    throw new Error('Function not implemented.')
-}

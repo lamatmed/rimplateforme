@@ -9,7 +9,6 @@ import Image from 'next/image'
 import { Role } from '@prisma/client'
 import { getUsers, toggleUserBlock } from '@/lib/actions'
 
-// Correction du type CreatedAt
 interface User {
   id: string
   name: string
@@ -17,7 +16,7 @@ interface User {
   role: Role
   photo: string | null
   isBlocked: boolean
-  createdAt: Date // Changé de string à Date
+  createdAt: string
 }
 
 export default function DashboardPage() {
@@ -26,19 +25,6 @@ export default function DashboardPage() {
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
   const [usersLoading, setUsersLoading] = useState(false)
-
-  // Ajout de l'écouteur d'événements d'authentification
-  useEffect(() => {
-    const handleAuthChange = () => {
-      fetchUser()
-    }
-
-    window.addEventListener('authChange', handleAuthChange)
-    
-    return () => {
-      window.removeEventListener('authChange', handleAuthChange)
-    }
-  }, [])
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -84,12 +70,6 @@ export default function DashboardPage() {
       setUsers(users.map(u => 
         u.id === userId ? { ...u, isBlocked: !currentStatus } : u
       ))
-      
-      // Si l'utilisateur bloqué est l'utilisateur actuel, déconnecter
-      if (user?.id === userId && !currentStatus) {
-        window.dispatchEvent(new CustomEvent('authChange'))
-        router.push('/login')
-      }
     } catch (error) {
       console.error('Error updating user:', error)
     }
@@ -139,8 +119,8 @@ export default function DashboardPage() {
                 className="rounded-full"
               />
             ) : (
-              <div className="h-16 w-16 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center justify-center text-white">
-                <span className="text-2xl font-bold">
+              <div className="h-16 w-16 rounded-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center">
+                <span className="text-2xl font-medium text-indigo-600 dark:text-indigo-300">
                   {user?.name?.charAt(0)}
                 </span>
               </div>
@@ -158,7 +138,7 @@ export default function DashboardPage() {
 
         {/* Statistiques */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-          <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 transition-all duration-300 hover:shadow-xl">
+          <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
             <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
               Total Utilisateurs
             </h3>
@@ -166,7 +146,7 @@ export default function DashboardPage() {
               {users.length}
             </p>
           </div>
-          <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 transition-all duration-300 hover:shadow-xl">
+          <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
             <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
               Utilisateurs Bloqués
             </h3>
@@ -174,7 +154,7 @@ export default function DashboardPage() {
               {users.filter(u => u.isBlocked).length}
             </p>
           </div>
-          <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 transition-all duration-300 hover:shadow-xl">
+          <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
             <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
               Administrateurs
             </h3>
@@ -186,7 +166,7 @@ export default function DashboardPage() {
 
         {/* Liste des utilisateurs (Admin uniquement) */}
         {user?.role === Role.ADMIN && (
-          <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 mb-6 transition-all duration-300 hover:shadow-xl">
+          <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 mb-6">
             <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
               Gestion des Utilisateurs
             </h2>
@@ -227,13 +207,13 @@ export default function DashboardPage() {
                               <Image
                                 src={user.photo}
                                 alt={user.name}
-                                width={40}
-                                height={40}
-                                className="rounded-full border-2 border-indigo-500"
+                                width={32}
+                                height={32}
+                                className="rounded-full"
                               />
                             ) : (
-                              <div className="h-10 w-10 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold">
-                                <span className="text-sm">
+                              <div className="h-8 w-8 rounded-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center">
+                                <span className="text-sm font-medium text-indigo-600 dark:text-indigo-300">
                                   {user.name.charAt(0)}
                                 </span>
                               </div>
@@ -267,11 +247,11 @@ export default function DashboardPage() {
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                           <button
                             onClick={() => handleToggleBlock(user.id, user.isBlocked)}
-                            className={`px-3 py-1 rounded-md font-medium ${
+                            className={`${
                               user.isBlocked
-                                ? 'bg-green-500 hover:bg-green-600 text-white'
-                                : 'bg-red-500 hover:bg-red-600 text-white'
-                            } transition-colors duration-300`}
+                                ? 'text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300'
+                                : 'text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300'
+                            }`}
                           >
                             {user.isBlocked ? 'Débloquer' : 'Bloquer'}
                           </button>
@@ -286,7 +266,7 @@ export default function DashboardPage() {
         )}
 
         {/* Contenu principal */}
-        <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 transition-all duration-300 hover:shadow-xl">
+        <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
           <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
             Vue d'ensemble
           </h2>
@@ -306,8 +286,4 @@ export default function DashboardPage() {
       </div>
     </div>
   )
-}
-
-function fetchUser() {
-    throw new Error('Function not implemented.')
 }
