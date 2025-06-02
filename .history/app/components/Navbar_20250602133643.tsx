@@ -6,7 +6,6 @@ import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { signOut } from '@/lib/actions';
-import { Role } from '@prisma/client';
 
 
 // Événement personnalisé pour les changements d'authentification

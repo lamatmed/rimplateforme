@@ -10,7 +10,6 @@ import { register } from '@/lib/actions';
 
 
 import Uploader from '../components/Uploader';
-import { Role } from '@prisma/client';
 
 export default function RegisterPage() {
   const router = useRouter();

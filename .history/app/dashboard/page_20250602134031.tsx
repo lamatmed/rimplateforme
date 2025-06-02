@@ -5,7 +5,6 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
-import { Role } from '@prisma/client'
 
 export default function DashboardPage() {
   const router = useRouter()

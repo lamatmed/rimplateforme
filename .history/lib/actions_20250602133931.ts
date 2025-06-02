@@ -6,7 +6,6 @@ import { hash, compare } from 'bcryptjs'
 import { prisma } from '@/lib/db'
 import { sign } from 'jsonwebtoken'
 import { cookies } from 'next/headers'
-import { Role } from '@prisma/client'
 
 
 const registerSchema = z.object({
