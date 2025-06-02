@@ -194,7 +194,7 @@ export async function getUsers() {
       select: { role: true }
     })
 
-    if (!user) {
+    if (!user || user.role !== Role.ADMIN) {
       throw new Error('Accès non autorisé')
     }
 

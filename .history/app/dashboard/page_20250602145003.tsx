@@ -51,9 +51,10 @@ export default function DashboardPage() {
                 const data = await response.json()
                 setUser(data)
 
-              
+                // Si l'utilisateur est admin, charger la liste des utilisateurs
+                if (data.role === Role.ADMIN) {
                     fetchUsers()
-                
+                }
             } catch (error) {
                 console.error('Error fetching user:', error)
                 router.push('/?message=Une erreur est survenue, veuillez vous reconnecter')
@@ -156,59 +157,35 @@ export default function DashboardPage() {
                 </div>
 
             
-                {/* Statistiques */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                    {user?.role === Role.ADMIN ? (
-                        <>
-                            <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 transition-all duration-300 hover:shadow-xl">
-                                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                                    Total Utilisateurs
-                                </h3>
-                                <p className="text-3xl font-bold text-indigo-600 dark:text-indigo-400">
-                                    {users.length}
-                                </p>
-                            </div>
-                            <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 transition-all duration-300 hover:shadow-xl">
-                                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                                    Utilisateurs Bloqués
-                                </h3>
-                                <p className="text-3xl font-bold text-indigo-600 dark:text-indigo-400">
-                                    {users.filter(u => u.isBlocked).length}
-                                </p>
-                            </div>
-                            <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 transition-all duration-300 hover:shadow-xl">
-                                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                                    Administrateurs
-                                </h3>
-                                <p className="text-3xl font-bold text-indigo-600 dark:text-indigo-400">
-                                    {users.filter(u => u.role === Role.ADMIN).length}
-                                </p>
-                            </div>
-                        </>
-                    ) : (
-                        <>
-                            <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 transition-all duration-300 hover:shadow-xl">
-                                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                                    Mon état
-                                </h3>
-                                <p className={`text-3xl font-bold ${user?.isBlocked
-                                        ? 'text-red-500 dark:text-red-400'
-                                        : 'text-green-600 dark:text-green-400'
-                                    }`}>
-                                    {user?.isBlocked ? 'Bloqué' : 'Actif'}
-                                </p>
-                            </div>
-                            <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 transition-all duration-300 hover:shadow-xl">
-                                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                                    Total Utilisateurs
-                                </h3>
-                                <p className="text-3xl font-bold text-indigo-600 dark:text-indigo-400">
-                                    {users.length}
-                                </p>
-                            </div>
-                        </>
-                    )}
-                </div>
+               {/* Statistiques (Admin uniquement) */}
+{user?.role === Role.ADMIN && (
+  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+    <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 transition-all duration-300 hover:shadow-xl">
+      <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+        Total Utilisateurs
+      </h3>
+      <p className="text-3xl font-bold text-indigo-600 dark:text-indigo-400">
+        {users.length}
+      </p>
+    </div>
+    <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 transition-all duration-300 hover:shadow-xl">
+      <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+        Utilisateurs Bloqués
+      </h3>
+      <p className="text-3xl font-bold text-indigo-600 dark:text-indigo-400">
+        {users.filter(u => u.isBlocked).length}
+      </p>
+    </div>
+    <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 transition-all duration-300 hover:shadow-xl">
+      <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+        Administrateurs
+      </h3>
+      <p className="text-3xl font-bold text-indigo-600 dark:text-indigo-400">
+        {users.filter(u => u.role === Role.ADMIN).length}
+      </p>
+    </div>
+  </div>
+)}
 
                 {/* Liste des utilisateurs (Admin uniquement) */}
                 {user?.role === Role.ADMIN && (

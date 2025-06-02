@@ -53,7 +53,7 @@ export default function DashboardPage() {
 
               
                     fetchUsers()
-                
+                }
             } catch (error) {
                 console.error('Error fetching user:', error)
                 router.push('/?message=Une erreur est survenue, veuillez vous reconnecter')

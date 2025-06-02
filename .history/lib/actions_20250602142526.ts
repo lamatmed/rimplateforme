@@ -94,18 +94,25 @@ export async function register(formData: FormData) {
       error: 'Une erreur est survenue l\'inscription',
     }
   }
-}
-
-export async function login(formData: FormData) {
+}export async function login(formData: FormData) {
   const validatedFields = loginSchema.safeParse({
     email: formData.get('email'),
     password: formData.get('password'),
   });
 
   if (!validatedFields.success) {
-    return {
-      error: validatedFields.error.errors[0].message,
-    };
+    // Vérifie si c'est une erreur d'email ou de mot de passe
+    const fieldErrors = validatedFields.error.flatten().fieldErrors;
+
+    if (fieldErrors.email) {
+      return { error: 'Adresse email invalide' };
+    }
+
+    if (fieldErrors.password) {
+      return { error: 'Mot de passe invalide' };
+    }
+
+    return { error: 'Champs invalides' };
   }
 
   const { email, password } = validatedFields.data;
@@ -115,24 +122,13 @@ export async function login(formData: FormData) {
       where: { email },
     });
 
-    if (!user) {
-      return {
-        error: 'Ce compte n\'existe pas',
-      };
+    // Si l'utilisateur n'existe pas ou que le mot de passe est faux → même message
+    if (!user || !(await compare(password, user.password))) {
+      return { error: 'Email ou mot de passe incorrect' };
     }
 
     if (user.isBlocked) {
-      return {
-        error: 'Votre compte a été bloqué',
-      };
-    }
-
-    const isPasswordValid = await compare(password, user.password);
-
-    if (!isPasswordValid) {
-      return {
-        error: 'Mot de passe incorrect',
-      };
+      return { error: 'Votre compte a été bloqué' };
     }
 
     const token = sign(
@@ -164,11 +160,10 @@ export async function login(formData: FormData) {
     };
   } catch (error) {
     console.error('Login error:', error);
-    return {
-      error: 'Une erreur est survenue lors de la connexion',
-    };
+    return { error: 'Une erreur est survenue lors de la connexion' };
   }
 }
+
 
 export async function signOut() {
   try {
@@ -194,7 +189,7 @@ export async function getUsers() {
       select: { role: true }
     })
 
-    if (!user) {
+    if (!user || user.role !== Role.ADMIN) {
       throw new Error('Accès non autorisé')
     }
 

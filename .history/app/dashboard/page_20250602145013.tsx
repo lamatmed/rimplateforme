@@ -51,9 +51,10 @@ export default function DashboardPage() {
                 const data = await response.json()
                 setUser(data)
 
-              
+                // Si l'utilisateur est admin, charger la liste des utilisateurs
+                if (data.role === Role.ADMIN) {
                     fetchUsers()
-                
+                }
             } catch (error) {
                 console.error('Error fetching user:', error)
                 router.push('/?message=Une erreur est survenue, veuillez vous reconnecter')

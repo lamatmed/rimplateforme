@@ -100,57 +100,57 @@ export async function login(formData: FormData) {
   const validatedFields = loginSchema.safeParse({
     email: formData.get('email'),
     password: formData.get('password'),
-  });
+  })
 
   if (!validatedFields.success) {
     return {
       error: validatedFields.error.errors[0].message,
-    };
+    }
   }
 
-  const { email, password } = validatedFields.data;
+  const { email, password } = validatedFields.data
 
   try {
     const user = await prisma.user.findUnique({
       where: { email },
-    });
+    })
 
     if (!user) {
       return {
-        error: 'Ce compte n\'existe pas',
-      };
+        error: 'Email ou mot de passe incorrect',
+      }
     }
 
     if (user.isBlocked) {
       return {
         error: 'Votre compte a été bloqué',
-      };
+      }
     }
 
-    const isPasswordValid = await compare(password, user.password);
+    const isPasswordValid = await compare(password, user.password)
 
     if (!isPasswordValid) {
       return {
-        error: 'Mot de passe incorrect',
-      };
+        error: 'Email ou mot de passe incorrect',
+      }
     }
 
     const token = sign(
-      {
+      { 
         userId: user.id,
         role: user.role,
-        email: user.email,
+        email: user.email 
       },
       process.env.JWT_SECRET || 'your-secret-key',
       { expiresIn: '7d' }
-    );
+    )
 
-    (await cookies()).set('token', token, {
+    ;(await cookies()).set('token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
       maxAge: 60 * 60 * 24 * 7, // 7 days
-    });
+    })
 
     return {
       success: true,
@@ -161,12 +161,12 @@ export async function login(formData: FormData) {
         role: user.role,
         photo: user.photo,
       },
-    };
+    }
   } catch (error) {
-    console.error('Login error:', error);
+    console.error('Login error:', error)
     return {
       error: 'Une erreur est survenue lors de la connexion',
-    };
+    }
   }
 }
 
@@ -194,7 +194,7 @@ export async function getUsers() {
       select: { role: true }
     })
 
-    if (!user) {
+    if (!user || user.role !== Role.ADMIN) {
       throw new Error('Accès non autorisé')
     }
 

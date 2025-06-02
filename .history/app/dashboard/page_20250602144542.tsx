@@ -51,9 +51,10 @@ export default function DashboardPage() {
                 const data = await response.json()
                 setUser(data)
 
-              
+                // Si l'utilisateur est admin, charger la liste des utilisateurs
+                if (data.role === Role.ADMIN) {
                     fetchUsers()
-                
+                }
             } catch (error) {
                 console.error('Error fetching user:', error)
                 router.push('/?message=Une erreur est survenue, veuillez vous reconnecter')
@@ -155,7 +156,7 @@ export default function DashboardPage() {
                     </div>
                 </div>
 
-            
+                {/* Statistiques */}
                 {/* Statistiques */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                     {user?.role === Role.ADMIN ? (
